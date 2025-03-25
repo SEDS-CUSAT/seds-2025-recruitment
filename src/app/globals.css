@@ -1,20 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 }
-
 @layer base {
   :root {
-    --background: 230 25% 12%;
+    --background: 230 25% 15%;
     --foreground: 210 40% 98%;
-    --card: 230 25% 14%;
+    --card: 230 25% 18%;
     --card-foreground: 210 40% 98%;
-    --popover: 230 25% 14%;
+    --popover: 230 25% 18%;
     --popover-foreground: 210 40% 98%;
     --primary: 217 91% 60%;
     --primary-foreground: 210 40% 98%;
@@ -32,7 +30,6 @@
     --radius: 0.5rem;
   }
 }
-
 @layer base {
   * {
     @apply border-border;
@@ -40,40 +37,8 @@
   
   body {
     @apply bg-background text-foreground relative min-h-screen;
-    background-image: 
-      radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(167, 139, 250, 0.1) 0%, transparent 40%),
-      radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.1) 0%, transparent 40%);
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background-image: 
-      radial-gradient(white, rgba(255,255,255,0) 2px),
-      radial-gradient(white, rgba(255,255,255,0) 1px);
-    background-position: 0 0, 20px 20px;
-    background-size: 80px 80px, 40px 40px;
-    opacity: 0.1;
-    animation: twinkle 8s infinite alternate;
-    z-index: 0;
   }
 }
-
-@keyframes twinkle {
-  0%, 100% {
-    opacity: 0.08;
-  }
-  50% {
-    opacity: 0.12;
-  }
-}
-
 @keyframes float {
   0%, 100% {
     transform: translateY(0);

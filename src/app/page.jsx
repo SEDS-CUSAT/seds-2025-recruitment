@@ -17,8 +17,6 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/toaster";
-import { Particles } from "@tsparticles/react";
-import { loadStarsPreset } from "tsparticles-preset-stars";
 import confetti from 'canvas-confetti';
 
 const MAX_FILE_SIZE = 512000;
@@ -187,32 +185,33 @@ export default function Home() {
   }
 
   const triggerConfetti = useCallback(() => {
-    const duration = 3000;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+    const end = Date.now() + 5000;
+
+    const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
     
-    function randomInRange(min, max) {
-      return Math.random() * (max - min) + min;
-    }
+    const fireSideConfetti = (side) => {
+      confetti({
+        particleCount: 30,
+        angle: side === 'left' ? 60 : 120,
+        spread: 70,
+        origin: { x: side === 'left' ? 0 : 1, y: 0.9 },
+        colors: colors,
+        startVelocity: 45,
+        gravity: 1,
+        drift: side === 'left' ? 2 : -2,
+        ticks: 400
+      });
+    };
 
-    const interval = setInterval(function() {
-      const timeLeft = duration - Date.now();
-
-      if (timeLeft <= 0) {
+    const interval = setInterval(() => {
+      if (Date.now() > end) {
         return clearInterval(interval);
       }
+      fireSideConfetti('left');
+      fireSideConfetti('right');
+    }, 300);
 
-      const particleCount = 50;
-
-      // Launch confetti from both sides
-      confetti(Object.assign({}, defaults, {
-        particleCount,
-        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-      }));
-      confetti(Object.assign({}, defaults, {
-        particleCount,
-        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-      }));
-    }, 250);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -220,45 +219,6 @@ export default function Home() {
       triggerConfetti();
     }
   }, [isSubmitted, triggerConfetti]);
-
-  const particlesInit = useCallback(async (engine) => {
-    await loadStarsPreset(engine);
-  }, []);
-
-  const particlesOptions = {
-    preset: "stars",
-    background: {
-      color: "transparent"
-    },
-    particles: {
-      color: {
-        value: ["#ffffff", "#87ceeb", "#f0c420"]
-      },
-      move: {
-        direction: "none",
-        enable: true,
-        speed: { min: 0.1, max: 0.5 }
-      },
-      number: {
-        value: 100,
-        density: {
-          enable: true,
-          value_area: 800
-        }
-      },
-      size: {
-        value: { min: 1, max: 3 }
-      },
-      opacity: {
-        value: { min: 0.3, max: 0.8 },
-        animation: {
-          enable: true,
-          speed: 0.5,
-          sync: false
-        }
-      }
-    }
-  };
 
   if (isSubmitted) {
     return (
@@ -283,302 +243,304 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center space-y-3">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            SEDS CUSAT Recruitment 2025
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Join us in exploring the frontiers of space
-          </p>
-        </div>
+    <>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 relative">
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-8 text-center space-y-3">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              SEDS CUSAT Recruitment 2025
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Join us in exploring the frontiers of space
+            </p>
+          </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              rules={{ required: "Name is required" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phoneNo"
-              rules={{ 
-                required: "Phone number is required",
-                pattern: {
-                  value: /^[0-9]{10}$/,
-                  message: "Please enter a valid 10-digit phone number"
-                }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="tel" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              rules={{ 
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Please enter a valid email address"
-                }
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="email" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="yearOfStudy"
-              rules={{ required: "Please select your year of study" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Year of Study</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                rules={{ required: "Name is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your year" />
-                      </SelectTrigger>
+                      <Input {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5].map((year) => (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="degree"
-              rules={{ required: "Please select your degree" }}
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Degree</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-row space-x-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="UG" id="UG" />
-                        <FormLabel htmlFor="UG">UG</FormLabel>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="PG" id="PG" />
-                        <FormLabel htmlFor="PG">PG</FormLabel>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="department"
-              rules={{ required: "Please select your department" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Department</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your department" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {DEPARTMENTS.map((dept) => (
-                        <SelectItem key={dept} value={dept}>
-                          {dept}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="course"
-              rules={{ required: "Course is required" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Course</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="team"
-              rules={{ required: "Please select your team" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Team you have been selected to</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your team" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {TEAMS.map((team) => (
-                        <SelectItem key={team} value={team}>
-                          {team}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="p-6 sm:p-8 border rounded-lg space-y-4 bg-card/50 backdrop-blur-sm">
-              <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Payment Details
-              </h2>
-              <div className="flex flex-col items-center space-y-4">
-                <p className="text-sm sm:text-base">UPI ID: <span className="font-mono font-medium text-accent-foreground">abithabala20@oksbi</span></p>
-                <div className="space-y-2 w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px]">
-                  <Image
-                    src="/payment-upi-qr.jpg"
-                    alt="Payment QR Code"
-                    width={400}
-                    height={400}
-                    className="border-2 p-2 rounded-lg bg-white w-full h-auto transition-transform hover:cursor-pointer"
-                    priority
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDownloadQR}
-                    className="w-full bg-card/50 backdrop-blur-sm hover:bg-accent/20"
-                  >
-                    Download QR Code
-                  </Button>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                  Scan the QR code above or use the UPI ID to make the payment. You can download the QR code if needed. After payment, enter the transaction ID and upload the screenshot below.
-                </p>
-              </div>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="transactionId"
-              rules={{ required: "Transaction ID is required" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>UPI Transaction ID</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-3">
-              <FormLabel>Payment Screenshot</FormLabel>
-              <div
-                {...getRootProps()}
-                className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent bg-card/50 backdrop-blur-sm transition-colors"
-              >
-                <input {...getInputProps()} />
-                {paymentImage ? (
-                  <div className="space-y-4">
-                    <div className="relative max-w-xl mx-auto">
-                      <Image
-                        src={paymentImage.preview}
-                        alt="Payment screenshot preview"
-                        width={400}
-                        height={400}
-                        className="mx-auto object-contain rounded-lg shadow-sm"
-                        style={{ maxHeight: '400px', width: 'auto' }}
-                        priority
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        Selected: {paymentImage.name}
-                      </p>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleRemoveImage}
-                        className="mt-2"
-                      >
-                        Remove Image
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <p>Drag and drop your payment screenshot here, or click to select</p>
-                    <p className="text-sm text-muted-foreground">
-                      Maximum file size: 500KB
-                    </p>
-                  </div>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-            </div>
+              />
 
-            <div className="flex justify-center pt-6">
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full sm:w-auto min-w-[200px] bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-accent/25"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-        <Toaster />
+              <FormField
+                control={form.control}
+                name="phoneNo"
+                rules={{ 
+                  required: "Phone number is required",
+                  pattern: {
+                    value: /^[0-9]{10}$/,
+                    message: "Please enter a valid 10-digit phone number"
+                  }
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="tel" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                rules={{ 
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Please enter a valid email address"
+                  }
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="yearOfStudy"
+                rules={{ required: "Please select your year of study" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Year of Study</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your year" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="degree"
+                rules={{ required: "Please select your degree" }}
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Degree</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-row space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="UG" id="UG" />
+                          <FormLabel htmlFor="UG">UG</FormLabel>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="PG" id="PG" />
+                          <FormLabel htmlFor="PG">PG</FormLabel>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="department"
+                rules={{ required: "Please select your department" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your department" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {DEPARTMENTS.map((dept) => (
+                          <SelectItem key={dept} value={dept}>
+                            {dept}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="course"
+                rules={{ required: "Course is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="team"
+                rules={{ required: "Please select your team" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Team you have been selected to</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your team" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TEAMS.map((team) => (
+                          <SelectItem key={team} value={team}>
+                            {team}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="p-6 sm:p-8 border rounded-lg space-y-4 bg-card/50 backdrop-blur-sm">
+                <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Payment Details
+                </h2>
+                <div className="flex flex-col items-center space-y-4">
+                  <p className="text-sm sm:text-base">UPI ID: <span className="font-mono font-medium text-accent-foreground">abithabala20@oksbi</span></p>
+                  <div className="space-y-2 w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px]">
+                    <Image
+                      src="/payment-upi-qr.jpg"
+                      alt="Payment QR Code"
+                      width={400}
+                      height={400}
+                      className="border-2 p-2 rounded-lg bg-white w-full h-auto transition-transform hover:cursor-pointer"
+                      priority
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownloadQR}
+                      className="w-full bg-card/50 backdrop-blur-sm hover:bg-accent/20"
+                    >
+                      Download QR Code
+                    </Button>
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                    Scan the QR code above or use the UPI ID to make the payment. You can download the QR code if needed. After payment, enter the transaction ID and upload the screenshot below.
+                  </p>
+                </div>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="transactionId"
+                rules={{ required: "Transaction ID is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>UPI Transaction ID</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-3">
+                <FormLabel>Payment Screenshot</FormLabel>
+                <div
+                  {...getRootProps()}
+                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent bg-card/50 backdrop-blur-sm transition-colors"
+                >
+                  <input {...getInputProps()} />
+                  {paymentImage ? (
+                    <div className="space-y-4">
+                      <div className="relative max-w-xl mx-auto">
+                        <Image
+                          src={paymentImage.preview}
+                          alt="Payment screenshot preview"
+                          width={400}
+                          height={400}
+                          className="mx-auto object-contain rounded-lg shadow-sm"
+                          style={{ maxHeight: '400px', width: 'auto' }}
+                          priority
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Selected: {paymentImage.name}
+                        </p>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleRemoveImage}
+                          className="mt-2"
+                        >
+                          Remove Image
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p>Drag and drop your payment screenshot here, or click to select</p>
+                      <p className="text-sm text-muted-foreground">
+                        Maximum file size: 500KB
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-center pt-6">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto min-w-[200px] bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-accent/25"
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+          <Toaster />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
