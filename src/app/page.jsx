@@ -32,6 +32,7 @@ const DEPARTMENTS = [
   'Department of Electronics (DOE)',
   'Department of English and Foreign Languages',
   'Department of Hindi',
+  'Department of Instrumentation',
   'Department of Marine Biology, Microbiology & Biochemistry',
   'Department of Mathematics',
   'Department of Physical Oceanography',
