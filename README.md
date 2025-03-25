@@ -20,4 +20,4 @@ npm run dev
 
 ## Environment Variables
 
-- `MONGODB_URI`: MongoDB connection string for storing application data
+- `MONGODB_URI`: MongoDB connection string for storing application data.
