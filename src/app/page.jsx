@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import { useToast } from "@/hooks/use-toast";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,18 +20,71 @@ import { Toaster } from "@/components/ui/toaster";
 
 const MAX_FILE_SIZE = 512000;
 
+const DEPARTMENTS = [
+  'Cochin University College of Engineering Kuttanad (CUCEK)',
+  'Department of Applied Economics',
+  'Department of Biotechnology',
+  'Department of Chemical Oceanography',
+  'Department of Chemistry',
+  'Department of Computer Applications (DCA)',
+  'Department of Computer Science (DCS)',
+  'Department of Electronics (DOE)',
+  'Department of English and Foreign Languages',
+  'Department of Hindi',
+  'Department of Marine Biology, Microbiology & Biochemistry',
+  'Department of Mathematics',
+  'Department of Physical Oceanography',
+  'Department of Physics',
+  'Department of Polymer Science and Rubber Technology',
+  'Department of Ship Technology',
+  'Department of Statistics',
+  'International School of Photonics (ISP)',
+  'Kunjali Marakkar School of Marine Engineering (KMSME)',
+  'School of Engineering (SOE)',
+  'School of Environmental Studies',
+  'School of Industrial Fisheries',
+  'School of Legal Studies (SLS)',
+  'School of Management Studies (SMS)'
+];
+
+const TEAMS = [
+  'Ambience',
+  'Content',
+  'Curation',
+  'Event',
+  'HR',
+  'Media and Production',
+  'Outreach',
+  'Project',
+  'Sponsorship',
+  'Tech'
+];
+
 export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentImage, setPaymentImage] = useState(null);
   const { toast } = useToast();
-  
+
+  const handleDownloadQR = () => {
+    const link = document.createElement('a');
+    link.href = '/payment-upi-qr.jpg';
+    link.download = 'seds2025-payment-upi-qrcode.jpg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleRemoveImage = (e) => {
+    e.stopPropagation();
+    setPaymentImage(null);
+  };
+
   const form = useForm({
     defaultValues: {
       name: "",
       phoneNo: "",
       email: "",
-      college: "",
       yearOfStudy: "",
       degree: "",
       department: "",
@@ -213,29 +265,6 @@ export default function Home() {
 
             <FormField
               control={form.control}
-              name="college"
-              rules={{ required: "Please select your college" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>College</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your college" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="CUSAT">CUSAT</SelectItem>
-                      <SelectItem value="CUCEK">CUCEK</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="yearOfStudy"
               rules={{ required: "Please select your year of study" }}
               render={({ field }) => (
@@ -250,7 +279,7 @@ export default function Home() {
                     <SelectContent>
                       {[1, 2, 3, 4, 5].map((year) => (
                         <SelectItem key={year} value={year.toString()}>
-                          Year {year}
+                          {year}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -291,13 +320,24 @@ export default function Home() {
             <FormField
               control={form.control}
               name="department"
-              rules={{ required: "Department is required" }}
+              rules={{ required: "Please select your department" }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Department</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your department" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {DEPARTMENTS.map((dept) => (
+                        <SelectItem key={dept} value={dept}>
+                          {dept}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -325,9 +365,20 @@ export default function Home() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Team you have been selected to</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your team" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TEAMS.map((team) => (
+                        <SelectItem key={team} value={team}>
+                          {team}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -337,16 +388,27 @@ export default function Home() {
               <h2 className="text-lg sm:text-xl font-semibold">Payment Details</h2>
               <div className="flex flex-col items-center space-y-4">
                 <p className="text-sm sm:text-base">UPI ID: <span className="font-mono font-medium">abithabala20@oksbi</span></p>
-                <Image
-                  src="/payment-upi-qr.jpg"
-                  alt="Payment QR Code"
-                  width={200}
-                  height={200}
-                  className="border-2 p-2 rounded-lg bg-white w-40 sm:w-48 md:w-52 h-auto"
-                  priority
-                />
+                <div className="space-y-2 w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px]">
+                  <Image
+                    src="/payment-upi-qr.jpg"
+                    alt="Payment QR Code"
+                    width={400}
+                    height={400}
+                    className="border-2 p-2 rounded-lg bg-white w-full h-auto"
+                    priority
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadQR}
+                    className="w-full"
+                  >
+                    Download QR Code
+                  </Button>
+                </div>
                 <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                  Scan the QR code above or use the UPI ID to make the payment. After payment, enter the transaction ID and upload the screenshot below.
+                  Scan the QR code above or use the UPI ID to make the payment. You can download the QR code if needed. After payment, enter the transaction ID and upload the screenshot below.
                 </p>
               </div>
             </div>
@@ -374,17 +436,32 @@ export default function Home() {
               >
                 <input {...getInputProps()} />
                 {paymentImage ? (
-                  <div className="space-y-2">
-                    <Image
-                      src={paymentImage.preview}
-                      alt="Payment screenshot preview"
-                      width={200}
-                      height={200}
-                      className="mx-auto object-contain"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Selected: {paymentImage.name}
-                    </p>
+                  <div className="space-y-4">
+                    <div className="relative max-w-xl mx-auto">
+                      <Image
+                        src={paymentImage.preview}
+                        alt="Payment screenshot preview"
+                        width={400}
+                        height={400}
+                        className="mx-auto object-contain rounded-lg shadow-sm"
+                        style={{ maxHeight: '400px', width: 'auto' }}
+                        priority
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Selected: {paymentImage.name}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleRemoveImage}
+                        className="mt-2"
+                      >
+                        Remove Image
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2">

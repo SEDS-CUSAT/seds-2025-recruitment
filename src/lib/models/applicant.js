@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
-import { createUserId } from '../createUserId';
+import { nanoid } from 'nanoid';
 
 const applicantSchema = new mongoose.Schema({
   userId: {
     type: String,
-    default: createUserId,
+    default: () => nanoid(),
     unique: true,
     required: true
   },
@@ -20,11 +20,6 @@ const applicantSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  college: {
-    type: String,
-    enum: ['CUSAT', 'CUCEK'],
-    required: true
-  },
   yearOfStudy: {
     type: Number,
     min: 1,
@@ -38,6 +33,32 @@ const applicantSchema = new mongoose.Schema({
   },
   department: {
     type: String,
+    enum: [
+      'Cochin University College of Engineering Kuttanad (CUCEK)',
+      'Department of Applied Economics',
+      'Department of Biotechnology',
+      'Department of Chemical Oceanography',
+      'Department of Chemistry',
+      'Department of Computer Applications (DCA)',
+      'Department of Computer Science (DCS)',
+      'Department of Electronics (DOE)',
+      'Department of English and Foreign Languages',
+      'Department of Hindi',
+      'Department of Marine Biology, Microbiology & Biochemistry',
+      'Department of Mathematics',
+      'Department of Physical Oceanography',
+      'Department of Physics',
+      'Department of Polymer Science and Rubber Technology',
+      'Department of Ship Technology',
+      'Department of Statistics',
+      'International School of Photonics (ISP)',
+      'Kunjali Marakkar School of Marine Engineering (KMSME)',
+      'School of Engineering (SOE)',
+      'School of Environmental Studies',
+      'School of Industrial Fisheries',
+      'School of Legal Studies (SLS)',
+      'School of Management Studies (SMS)'
+    ],
     required: true
   },
   course: {
@@ -46,6 +67,18 @@ const applicantSchema = new mongoose.Schema({
   },
   team: {
     type: String,
+    enum: [
+      'Ambience',
+      'Content',
+      'Curation',
+      'Event',
+      'HR',
+      'Media and Production',
+      'Outreach',
+      'Project',
+      'Sponsorship',
+      'Tech'
+    ],
     required: true
   },
   transactionId: {
