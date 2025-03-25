@@ -266,7 +266,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Enter your full name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -285,9 +285,9 @@ export default function Home() {
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Phone Number (10 digits, without country code)</FormLabel>
                     <FormControl>
-                      <Input {...field} type="tel" />
+                      <Input placeholder="1234567890" {...field} type="tel" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -308,7 +308,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} type="email" />
+                      <Input placeholder="your.name@example.com" {...field} type="email" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -403,7 +403,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Course</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="e.g., B.Tech Computer Science" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -475,7 +475,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>UPI Transaction ID</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Enter the UPI transaction reference number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
