@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
@@ -17,6 +17,9 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/toaster";
+import { Particles } from "@tsparticles/react";
+import { loadStarsPreset } from "tsparticles-preset-stars";
+import confetti from 'canvas-confetti';
 
 const MAX_FILE_SIZE = 512000;
 
@@ -183,14 +186,97 @@ export default function Home() {
     }
   }
 
+  const triggerConfetti = useCallback(() => {
+    const duration = 3000;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+    
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+      const timeLeft = duration - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50;
+
+      // Launch confetti from both sides
+      confetti(Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      }));
+      confetti(Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      }));
+    }, 250);
+  }, []);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      triggerConfetti();
+    }
+  }, [isSubmitted, triggerConfetti]);
+
+  const particlesInit = useCallback(async (engine) => {
+    await loadStarsPreset(engine);
+  }, []);
+
+  const particlesOptions = {
+    preset: "stars",
+    background: {
+      color: "transparent"
+    },
+    particles: {
+      color: {
+        value: ["#ffffff", "#87ceeb", "#f0c420"]
+      },
+      move: {
+        direction: "none",
+        enable: true,
+        speed: { min: 0.1, max: 0.5 }
+      },
+      number: {
+        value: 100,
+        density: {
+          enable: true,
+          value_area: 800
+        }
+      },
+      size: {
+        value: { min: 1, max: 3 }
+      },
+      opacity: {
+        value: { min: 0.3, max: 0.8 },
+        animation: {
+          enable: true,
+          speed: 0.5,
+          sync: false
+        }
+      }
+    }
+  };
+
   if (isSubmitted) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Thank You!</h1>
-          <p className="text-lg text-muted-foreground">
-            Your application has been submitted successfully.
-          </p>
+      <div className="relative min-h-screen flex flex-col items-center justify-center p-8">
+        <div className="text-center space-y-6 animate-float z-10">
+          <div className="space-y-4">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              Thank You!
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Your application has been submitted successfully.
+            </p>
+          </div>
+          <div className="mt-8 opacity-90">
+            <p className="text-sm text-muted-foreground">
+              Welcome to SEDS CUSAT! We'll be in touch soon.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -199,9 +285,13 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold">SEDS CUSAT Recruitment 2025</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-2">Fill in your details below to apply</p>
+        <div className="mb-8 text-center space-y-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            SEDS CUSAT Recruitment 2025
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Join us in exploring the frontiers of space
+          </p>
         </div>
 
         <Form {...form}>
@@ -384,17 +474,19 @@ export default function Home() {
               )}
             />
 
-            <div className="p-4 sm:p-6 border rounded-lg space-y-4 bg-muted/30">
-              <h2 className="text-lg sm:text-xl font-semibold">Payment Details</h2>
+            <div className="p-6 sm:p-8 border rounded-lg space-y-4 bg-card/50 backdrop-blur-sm">
+              <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Payment Details
+              </h2>
               <div className="flex flex-col items-center space-y-4">
-                <p className="text-sm sm:text-base">UPI ID: <span className="font-mono font-medium">abithabala20@oksbi</span></p>
+                <p className="text-sm sm:text-base">UPI ID: <span className="font-mono font-medium text-accent-foreground">abithabala20@oksbi</span></p>
                 <div className="space-y-2 w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px]">
                   <Image
                     src="/payment-upi-qr.jpg"
                     alt="Payment QR Code"
                     width={400}
                     height={400}
-                    className="border-2 p-2 rounded-lg bg-white w-full h-auto"
+                    className="border-2 p-2 rounded-lg bg-white w-full h-auto transition-transform hover:cursor-pointer"
                     priority
                   />
                   <Button
@@ -402,7 +494,7 @@ export default function Home() {
                     variant="outline"
                     size="sm"
                     onClick={handleDownloadQR}
-                    className="w-full"
+                    className="w-full bg-card/50 backdrop-blur-sm hover:bg-accent/20"
                   >
                     Download QR Code
                   </Button>
@@ -432,7 +524,7 @@ export default function Home() {
               <FormLabel>Payment Screenshot</FormLabel>
               <div
                 {...getRootProps()}
-                className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary"
+                className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent bg-card/50 backdrop-blur-sm transition-colors"
               >
                 <input {...getInputProps()} />
                 {paymentImage ? (
@@ -478,7 +570,7 @@ export default function Home() {
               <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full sm:w-auto min-w-[200px]"
+                className="w-full sm:w-auto min-w-[200px] bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-accent/25"
               >
                 {isSubmitting ? "Submitting..." : "Submit Application"}
               </Button>

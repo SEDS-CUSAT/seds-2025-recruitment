@@ -7,15 +7,20 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "SEDS CUSAT 2025 Recruitment",
-  description: "Join us for the 2025 recruitment drive at SEDS CUSAT!",
+  title: "SEDS CUSAT Recruitment 2025 | Students for the Exploration and Development of Space",
+  description: "Join the Students for the Exploration and Development of Space (SEDS) CUSAT chapter for our 2025 recruitment drive!",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
-        {children}
+    <html lang="en" className="dark">
+      <head>
+        <link rel="icon" href="/ires-seds-logo.jpg" />
+      </head>
+      <body className={`${inter.variable} font-sans antialiased bg-gradient-to-b`}>
+        <div className="min-h-screen relative">
+          {children}
+        </div>
       </body>
     </html>
   );
