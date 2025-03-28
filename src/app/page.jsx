@@ -93,6 +93,7 @@ export default function Home() {
     toast({
       title: "Copied!",
       description: "UPI ID copied to clipboard",
+      variant: "success",
     });
   };
 
@@ -512,7 +513,7 @@ export default function Home() {
                       variant="ghost"
                       size="sm"
                       onClick={handleCopyUPI}
-                      className="px-2 py-1 h-auto"
+                      className="px-[6px] py-[6px] h-auto"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
