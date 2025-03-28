@@ -387,24 +387,13 @@ export default function Home() {
                     <FormLabel>Department</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                       <FormControl>
-                        <SelectTrigger className="text-sm min-h-[2.5rem] h-auto">
-                          <SelectValue 
-                            placeholder="Select your department" 
-                            className="text-wrap break-words line-clamp-2"
-                          />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your department" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent 
-                        className="w-[calc(100vw-2rem)] sm:w-auto"
-                        align="start"
-                        sideOffset={4}
-                      >
+                      <SelectContent>
                         {DEPARTMENTS.map((dept) => (
-                          <SelectItem 
-                            key={dept} 
-                            value={dept}
-                            className="text-sm whitespace-normal pr-6 py-2.5 min-h-[2.5rem]"
-                          >
+                          <SelectItem key={dept} value={dept}>
                             {dept}
                           </SelectItem>
                         ))}
