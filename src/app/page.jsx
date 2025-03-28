@@ -82,6 +82,14 @@ export default function Home() {
     setPaymentImage(null);
   };
 
+  const handleCopyUPI = () => {
+    navigator.clipboard.writeText('abithabala20@oksbi');
+    toast({
+      title: "Copied!",
+      description: "UPI ID copied to clipboard",
+    });
+  };
+
   const form = useForm({
     defaultValues: {
       name: "",
@@ -186,7 +194,7 @@ export default function Home() {
   }
 
   const triggerConfetti = useCallback(() => {
-    const end = Date.now() + 5000;
+    const end = Date.now() + 2000;
 
     const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
     
@@ -440,8 +448,20 @@ export default function Home() {
                 <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   Payment Details
                 </h2>
-                <div className="flex flex-col items-center space-y-4">
-                  <p className="text-sm sm:text-base">UPI ID: <span className="font-mono font-medium text-accent-foreground">abithabala20@oksbi</span></p>
+                <div className="flex flex-col items-center space-y-1">
+                  <div className="flex items-center xs:gap-2 sm:gap-3">
+                    <p className="text-base sm:text-lg">UPI&nbsp;ID:&nbsp;<span className="font-mono font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">abithabala20@oksbi</span></p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCopyUPI}
+                      className="px-2 py-1 h-auto"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    </Button>
+                  </div>
+                  <p className="text-base sm:text-lg pb-6">Amount: <span className="font-mono font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">₹350</span></p>
                   <div className="space-y-2 w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px]">
                     <Image
                       src="/payment-upi-qr.jpg"
@@ -456,7 +476,7 @@ export default function Home() {
                       variant="outline"
                       size="sm"
                       onClick={handleDownloadQR}
-                      className="w-full bg-card/50 backdrop-blur-sm hover:bg-accent/20"
+                      className="w-full bg-card/50 backdrop-blur-sm hover:bg-accent/80"
                     >
                       Download QR Code
                     </Button>
