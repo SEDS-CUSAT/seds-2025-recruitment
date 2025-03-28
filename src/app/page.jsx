@@ -18,9 +18,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/toaster";
 import confetti from 'canvas-confetti';
+import { cn } from "@/lib/utils";
 
 const MAX_FILE_SIZE = 512000;
-
 const DEPARTMENTS = [
   'Cochin University College of Engineering Kuttanad (CUCEK)',
   'Department of Applied Economics',
@@ -156,7 +156,7 @@ export default function Home() {
     if (!paymentImage?.base64) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "No Image Selected",
         description: "Please upload a payment screenshot"
       });
       return;
@@ -274,7 +274,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field} />
+                      <Input disabled={isSubmitting} placeholder="Enter your full name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -295,7 +295,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Phone Number (10 digits, without country code)</FormLabel>
                     <FormControl>
-                      <Input placeholder="1234567890" {...field} type="tel" />
+                      <Input disabled={isSubmitting} placeholder="1234567890" {...field} type="tel" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -316,7 +316,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="your.name@example.com" {...field} type="email" />
+                      <Input disabled={isSubmitting} placeholder="your.name@example.com" {...field} type="email" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -330,7 +330,7 @@ export default function Home() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Year of Study</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your year" />
@@ -361,6 +361,7 @@ export default function Home() {
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         className="flex flex-row space-x-4"
+                        disabled={isSubmitting}
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="UG" id="UG" />
@@ -384,7 +385,7 @@ export default function Home() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Department</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your department" />
@@ -411,7 +412,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Course</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., B.Tech Computer Science" {...field} />
+                      <Input disabled={isSubmitting} placeholder="e.g., B.Tech Computer Science" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -425,7 +426,7 @@ export default function Home() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Team you have been selected to</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your team" />
@@ -495,7 +496,7 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>UPI Transaction ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter the UPI transaction reference number" {...field} />
+                      <Input disabled={isSubmitting} placeholder="Enter the UPI transaction reference number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -506,7 +507,10 @@ export default function Home() {
                 <FormLabel>Payment Screenshot</FormLabel>
                 <div
                   {...getRootProps()}
-                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent bg-card/50 backdrop-blur-sm transition-colors"
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-accent bg-card/50 backdrop-blur-sm transition-colors",
+                    isSubmitting && "pointer-events-none opacity-50"
+                  )}
                 >
                   <input {...getInputProps()} />
                   {paymentImage ? (
@@ -552,9 +556,35 @@ export default function Home() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto min-w-[200px] bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-accent/25"
+                  className="w-full sm:w-auto min-w-[200px] bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 transition-all duration-300 shadow-lg hover:shadow-accent/25 relative"
                 >
-                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      <span>Submitting</span>
+                    </div>
+                  ) : (
+                    "Submit Application"
+                  )}
                 </Button>
               </div>
             </form>
