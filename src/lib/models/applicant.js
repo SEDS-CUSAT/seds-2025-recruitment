@@ -1,10 +1,8 @@
 import mongoose from 'mongoose';
-import { nanoid } from 'nanoid';
 
 const applicantSchema = new mongoose.Schema({
   userId: {
     type: String,
-    default: () => nanoid(),
     unique: true,
     required: true
   },
