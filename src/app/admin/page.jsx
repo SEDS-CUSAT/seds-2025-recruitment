@@ -204,21 +204,22 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <Tabs value={filterStatus} onValueChange={setFilterStatus} className="w-[400px]">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="verified">Verified</TabsTrigger>
-                <TabsTrigger value="rejected">Rejected</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Button onClick={handleLogout} variant="outline">Logout</Button>
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h1 className="text-2xl font-bold text-center sm:text-left">Admin Dashboard</h1>
+            <Button onClick={handleLogout} variant="outline" className="w-full sm:w-auto">Logout</Button>
           </div>
+          
+          <Tabs value={filterStatus} onValueChange={setFilterStatus} className="w-full">
+            <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 p-1 min-h-[88px] sm:min-h-0">
+              <TabsTrigger value="all" className="py-2.5">All</TabsTrigger>
+              <TabsTrigger value="pending" className="py-2.5">Pending</TabsTrigger>
+              <TabsTrigger value="verified" className="py-2.5">Verified</TabsTrigger>
+              <TabsTrigger value="rejected" className="py-2.5">Rejected</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -229,27 +230,27 @@ export default function AdminDashboard() {
               onClick={() => setSelectedApplicant(applicant)}
             >
               <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
                     <h2 className="font-semibold truncate">{applicant.name}</h2>
-                    <p className="text-sm text-muted-foreground">ID: {applicant.userId}</p>
+                    <p className="text-sm text-muted-foreground truncate">ID: {applicant.userId}</p>
                   </div>
-                  <Badge variant="outline" className={getStatusBadgeVariant(applicant.status)}>
+                  <Badge variant="outline" className={`${getStatusBadgeVariant(applicant.status)} shrink-0`}>
                     {applicant.status}
                   </Badge>
                 </div>
-                <div className="text-sm space-y-1">
+                <div className="text-sm space-y-1.5">
                   <p>Year: {applicant.yearOfStudy}</p>
                   <p className="truncate">Dept: {applicant.department}</p>
-                  <p className="truncate text-muted-foreground">Team: {applicant.team}</p>
+                  <p className="text-muted-foreground">Team: {applicant.team}</p>
                 </div>
-                <div className="relative w-full h-[200px]">
+                <div className="relative w-full h-[180px] sm:h-[200px]">
                   <Image
                     src={applicant.paymentScreenshot}
                     alt="Payment Screenshot"
                     fill
                     className="object-contain rounded-lg"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
               </div>
@@ -260,13 +261,13 @@ export default function AdminDashboard() {
 
       {fullscreenImage && selectedApplicant && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
           onClick={() => setFullscreenImage(false)}
         >
           <Button
             variant="secondary"
             size="icon"
-            className="absolute top-4 right-4"
+            className="fixed top-4 right-4 z-[101]"
             onClick={(e) => {
               e.stopPropagation();
               setFullscreenImage(false);
@@ -276,12 +277,14 @@ export default function AdminDashboard() {
               <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
             </svg>
           </Button>
-          <img
-            src={selectedApplicant.paymentScreenshot}
-            alt="Payment Screenshot"
-            className="max-h-[90vh] max-w-[90vw] object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="w-screen h-screen p-4 flex items-center justify-center">
+            <img
+              src={selectedApplicant.paymentScreenshot}
+              alt="Payment Screenshot"
+              className="max-w-[95vw] max-h-[95vh] w-auto h-auto object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
 
@@ -291,114 +294,123 @@ export default function AdminDashboard() {
           setSelectedApplicant(null);
         }}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="p-0">
           {selectedApplicant && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-xl font-semibold flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    {selectedApplicant.name}
-                    <Badge variant="outline" className={getStatusBadgeVariant(selectedApplicant.status)}>
-                      {selectedApplicant.status}
-                    </Badge>
-                  </div>
-                  <div className="text-sm font-normal text-muted-foreground flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
-                    ID: {selectedApplicant.userId}
-                  </div>
-                </DialogTitle>
-              </DialogHeader>
+            <div className="flex flex-col h-[100dvh] sm:h-[85vh]">
+              <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+                <DialogHeader className="p-4">
+                  <DialogTitle className="text-xl font-semibold flex flex-col gap-2">
+                    <div className="flex items-start sm:items-center gap-3 flex-wrap">
+                      <span className="truncate">{selectedApplicant.name}</span>
+                      <Badge variant="outline" className={getStatusBadgeVariant(selectedApplicant.status)}>
+                        {selectedApplicant.status}
+                      </Badge>
+                    </div>
+                    <div className="text-sm font-normal text-muted-foreground flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
+                      <span className="truncate">ID: {selectedApplicant.userId}</span>
+                    </div>
+                  </DialogTitle>
+                </DialogHeader>
+              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                <div className="space-y-4">
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                      Contact Information
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Email:</span>
-                        <span className="font-medium">{selectedApplicant.email}</span>
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-4 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h3 className="font-semibold mb-3 flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                          Contact Information
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-start gap-2 break-all">
+                            <span className="text-muted-foreground shrink-0">Email:</span>
+                            <span className="font-medium">{selectedApplicant.email}</span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-muted-foreground shrink-0">Phone:</span>
+                            <span className="font-medium">{selectedApplicant.phoneNo}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Phone:</span>
-                        <span className="font-medium">{selectedApplicant.phoneNo}</span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                      Academic Information
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Year:</span>
-                        <span className="font-medium">{selectedApplicant.yearOfStudy}</span>
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h3 className="font-semibold mb-3 flex items-start gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                          Academic Information
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-start gap-2">
+                            <span className="text-muted-foreground">Year:</span>
+                            <span className="font-medium">{selectedApplicant.yearOfStudy}</span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-muted-foreground">Degree:</span>
+                            <span className="font-medium">{selectedApplicant.degree}</span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-muted-foreground">Department:</span>
+                            <span className="font-medium">{selectedApplicant.department}</span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="text-muted-foreground">Course:</span>
+                            <span className="font-medium">{selectedApplicant.course}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Degree:</span>
-                        <span className="font-medium">{selectedApplicant.degree}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Department:</span>
-                        <span className="font-medium">{selectedApplicant.department}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Course:</span>
-                        <span className="font-medium">{selectedApplicant.course}</span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
-                      Team & Payment
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Selected Team:</span>
-                        <span className="font-medium">{selectedApplicant.team}</span>
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h3 className="font-semibold mb-3 flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
+                          Team & Payment
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Selected Team:</span>
+                            <span className="font-medium">{selectedApplicant.team}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Transaction ID:</span>
+                            <span className="font-mono font-medium">{selectedApplicant.transactionId}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Transaction ID:</span>
-                        <span className="font-mono font-medium">{selectedApplicant.transactionId}</span>
+                    </div>
+                    <div>
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h3 className="font-semibold mb-3 flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4z"/><circle cx="12" cy="13" r="3"/></svg>
+                            Payment Screenshot
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFullscreenImage(true)}
+                            className="shrink-0"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                          </Button>
+                        </h3>
+                        <div className="relative w-full h-[300px]">
+                          <Image
+                            src={selectedApplicant.paymentScreenshot}
+                            alt="Payment Screenshot"
+                            fill
+                            className="object-contain rounded-lg cursor-pointer"
+                            onClick={() => setFullscreenImage(true)}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <h3 className="font-semibold mb-3 flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3L14.5 4z"/><circle cx="12" cy="13" r="3"/></svg>
-                        Payment Screenshot
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setFullscreenImage(true)}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-                      </Button>
-                    </h3>
-                    <div className="relative w-full h-[300px]">
-                      <Image
-                        src={selectedApplicant.paymentScreenshot}
-                        alt="Payment Screenshot"
-                        fill
-                        className="object-contain rounded-lg cursor-pointer"
-                        onClick={() => setFullscreenImage(true)}
-                      />
-                    </div>
+                  <div className="sticky bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t pt-4">
+                    {getActionButtons(selectedApplicant)}
                   </div>
                 </div>
               </div>
-              {getActionButtons(selectedApplicant)}
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
