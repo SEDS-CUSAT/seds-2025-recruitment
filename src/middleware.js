@@ -6,11 +6,14 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  const token = cookies().get('admin-token')?.value;
+
   if (request.nextUrl.pathname === '/admin/login') {
+    if (token) {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
     return NextResponse.next();
   }
-
-  const token = request.cookies.get('admin-token');
 
   if (!token) {
     return NextResponse.redirect(new URL('/admin/login', request.url));

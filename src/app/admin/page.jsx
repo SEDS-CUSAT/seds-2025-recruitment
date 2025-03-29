@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionType, setActionType] = useState("");
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -59,6 +60,7 @@ export default function AdminDashboard() {
   async function handleVerify(userId, status) {
     try {
       setActionLoading(true);
+      setActionType(status);
       const res = await fetch(`/api/admin/applicants/${userId}/verify`, {
         method: "POST",
         headers: {
@@ -137,7 +139,7 @@ export default function AdminDashboard() {
             onClick={() => handleVerify(applicant.userId, "rejected")}
             disabled={actionLoading}
           >
-            {actionLoading ? (
+            {(actionLoading && actionType === "rejected") ? (
               <div className="flex items-center gap-2">
                 <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -154,7 +156,7 @@ export default function AdminDashboard() {
             disabled={actionLoading}
             className="bg-emerald-600 hover:bg-emerald-700"
           >
-            {actionLoading ? (
+            {(actionLoading && actionType === "verified")? (
               <div className="flex items-center gap-2">
                 <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -196,9 +198,33 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        <p className="text-muted-foreground animate-pulse">Loading applications...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
+        <div className="relative">
+          <svg
+            className="animate-spin h-12 w-12 text-primary"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="3"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+        </div>
+        <div className="text-center space-y-2">
+          <p className="text-lg font-medium text-primary animate-pulse">Loading applications...</p>
+          <p className="text-sm text-muted-foreground">Please wait while we fetch the data</p>
+        </div>
       </div>
     );
   }
@@ -290,11 +316,9 @@ export default function AdminDashboard() {
 
       <Dialog 
         open={!!selectedApplicant && !fullscreenImage} 
-        onOpenChange={() => {
-          setSelectedApplicant(null);
-        }}
+        onOpenChange={() => setSelectedApplicant(null)}
       >
-        <DialogContent className="p-0">
+        <DialogContent className="p-0 sm:max-w-3xl lg:max-w-5xl">
           {selectedApplicant && (
             <div className="flex flex-col h-[100dvh] sm:h-[85vh]">
               <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
@@ -314,8 +338,8 @@ export default function AdminDashboard() {
                 </DialogHeader>
               </div>
               
-              <div className="flex-1 overflow-y-auto">
-                <div className="p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:none]">
+                <div className="p-4 pb-20 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-4">
                       <div className="bg-muted/50 rounded-lg p-4">
@@ -405,7 +429,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="sticky bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t pt-4">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t">
                     {getActionButtons(selectedApplicant)}
                   </div>
                 </div>
