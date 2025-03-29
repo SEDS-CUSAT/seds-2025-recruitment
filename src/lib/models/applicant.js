@@ -42,6 +42,7 @@ const applicantSchema = new mongoose.Schema({
       'Department of Electronics (DOE)',
       'Department of English and Foreign Languages',
       'Department of Hindi',
+      'Department of Instrumentation',
       'Department of Marine Biology, Microbiology & Biochemistry',
       'Department of Mathematics',
       'Department of Physical Oceanography',
@@ -55,7 +56,7 @@ const applicantSchema = new mongoose.Schema({
       'School of Environmental Studies',
       'School of Industrial Fisheries',
       'School of Legal Studies (SLS)',
-      'School of Management Studies (SMS)'
+      'School of Management Studies (SMS)',
     ],
     required: true
   },
