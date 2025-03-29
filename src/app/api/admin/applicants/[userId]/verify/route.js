@@ -10,6 +10,8 @@ export async function POST(req, { params }) {
     await connectDB();
     
     const { userId } = params;
+    const { status } = await req.json();
+
     const applicant = await Applicant.findOne({ userId });
     
     if (!applicant) {
@@ -19,7 +21,14 @@ export async function POST(req, { params }) {
       );
     }
 
-    applicant.approved = true;
+    if (!['verified', 'rejected', 'pending'].includes(status)) {
+      return NextResponse.json(
+        { error: 'Invalid status' },
+        { status: 400 }
+      );
+    }
+
+    applicant.status = status;
     await applicant.save();
 
     return NextResponse.json({ success: true });

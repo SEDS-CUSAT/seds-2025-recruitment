@@ -87,14 +87,15 @@ const applicantSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  status: {
+    type: String,
+    enum: ['pending', 'verified', 'rejected'],
+    default: 'pending'
+  },
   createdAt: {
     type: Date,
     default: Date.now
-  },
-  verified: {
-    type: Boolean,
-    default: false
-  },
+  }
 });
 
 export default mongoose.models.Applicant || mongoose.model('Applicant', applicantSchema);
