@@ -90,7 +90,11 @@ const applicantSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
 });
 
 export default mongoose.models.Applicant || mongoose.model('Applicant', applicantSchema);
