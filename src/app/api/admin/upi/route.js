@@ -3,9 +3,12 @@ import { verifyAuth } from "@/lib/auth";
 import Admin from "@/lib/models/admin";
 import { DEFAULT_UPI_LIST } from "@/lib/constants";
 import { createDiscordEmbed, sendDiscordWebhook } from '@/lib/sendWebhook';
+import connectDB from '@/lib/db';
 
 export async function GET(request) {
   try {
+    await connectDB();
+    
     const admin = await Admin.findOne({});
     if (!admin) {
       return NextResponse.json({ 
@@ -41,6 +44,8 @@ export async function GET(request) {
 
 export async function PUT(request) {
   try {
+    await connectDB();
+    
     const admin = await verifyAuth();
     if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -78,7 +83,7 @@ export async function PUT(request) {
         color: "#00ff00",
         fields: [
           { name: "Changed By", value: admin.email, inline: true },
-          { name: "Previous Account", value: previousPerson, inline: true },
+          { name: "Previous Account", value: previousPerson || "None", inline: true },
           { name: "New Account", value: person, inline: true }
         ]
       })
