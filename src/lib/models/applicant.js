@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { DEPARTMENTS, TEAMS } from '../constants';
 
 const applicantSchema = new mongoose.Schema({
   userId: {
@@ -31,33 +32,7 @@ const applicantSchema = new mongoose.Schema({
   },
   department: {
     type: String,
-    enum: [
-      'Cochin University College of Engineering Kuttanad (CUCEK)',
-      'Department of Applied Economics',
-      'Department of Biotechnology',
-      'Department of Chemical Oceanography',
-      'Department of Chemistry',
-      'Department of Computer Applications (DCA)',
-      'Department of Computer Science (DCS)',
-      'Department of Electronics (DOE)',
-      'Department of English and Foreign Languages',
-      'Department of Hindi',
-      'Department of Instrumentation',
-      'Department of Marine Biology, Microbiology & Biochemistry',
-      'Department of Mathematics',
-      'Department of Physical Oceanography',
-      'Department of Physics',
-      'Department of Polymer Science and Rubber Technology',
-      'Department of Ship Technology',
-      'Department of Statistics',
-      'International School of Photonics (ISP)',
-      'Kunjali Marakkar School of Marine Engineering (KMSME)',
-      'School of Engineering (SOE)',
-      'School of Environmental Studies',
-      'School of Industrial Fisheries',
-      'School of Legal Studies (SLS)',
-      'School of Management Studies (SMS)',
-    ],
+    enum: DEPARTMENTS,
     required: true
   },
   course: {
@@ -66,18 +41,7 @@ const applicantSchema = new mongoose.Schema({
   },
   team: {
     type: String,
-    enum: [
-      'Ambience',
-      'Content',
-      'Curation',
-      'Event',
-      'HR',
-      'Media and Production',
-      'Outreach',
-      'Project',
-      'Sponsorship',
-      'Tech'
-    ],
+    enum: TEAMS,
     required: true
   },
   transactionId: {

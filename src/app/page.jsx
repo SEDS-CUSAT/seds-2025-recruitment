@@ -26,47 +26,7 @@ import { Toaster } from "@/components/ui/toaster";
 import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
 
-const MAX_FILE_SIZE = 512000;
-const DEPARTMENTS = [
-  "Cochin University College of Engineering Kuttanad (CUCEK)",
-  "Department of Applied Economics",
-  "Department of Biotechnology",
-  "Department of Chemical Oceanography",
-  "Department of Chemistry",
-  "Department of Computer Applications (DCA)",
-  "Department of Computer Science (DCS)",
-  "Department of Electronics (DOE)",
-  "Department of English and Foreign Languages",
-  "Department of Hindi",
-  "Department of Instrumentation",
-  "Department of Marine Biology, Microbiology & Biochemistry",
-  "Department of Mathematics",
-  "Department of Physical Oceanography",
-  "Department of Physics",
-  "Department of Polymer Science and Rubber Technology",
-  "Department of Ship Technology",
-  "Department of Statistics",
-  "International School of Photonics (ISP)",
-  "Kunjali Marakkar School of Marine Engineering (KMSME)",
-  "School of Engineering (SOE)",
-  "School of Environmental Studies",
-  "School of Industrial Fisheries",
-  "School of Legal Studies (SLS)",
-  "School of Management Studies (SMS)",
-];
-
-const TEAMS = [
-  "Ambience",
-  "Content",
-  "Curation",
-  "Event",
-  "HR",
-  "Media and Production",
-  "Outreach",
-  "Project",
-  "Sponsorship",
-  "Tech",
-];
+import { DEPARTMENTS, TEAMS, MAX_FILE_SIZE } from "@/lib/constants";
 
 export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -172,7 +132,7 @@ export default function Home() {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         formData.append(key, data[key]);
       });
       formData.append("paymentScreenshot", paymentImage.base64);
@@ -210,7 +170,7 @@ export default function Home() {
       "#FFFF00",
       "#FF00FF",
       "#00FFFF",
-      "#00FFEE"
+      "#00FFEE",
     ];
 
     const fireSideConfetti = (side) => {
