@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/auth";
 import Admin from "@/lib/models/admin";
 import { DEFAULT_UPI_LIST } from "@/lib/constants";
+import { createDiscordEmbed, sendDiscordWebhook } from '@/lib/sendWebhook';
 
 export async function GET(request) {
   try {
@@ -16,6 +17,18 @@ export async function GET(request) {
     return NextResponse.json({ person: currentUpiPerson, details: upiDetails });
   } catch (error) {
     console.error("Error in UPI GET route:", error);
+    await sendDiscordWebhook(
+      "❌ UPI Fetch Error",
+      createDiscordEmbed({
+        title: "UPI System Error",
+        description: "Error occurred while fetching UPI details",
+        color: "#ff0000",
+        fields: [
+          { name: "Error Message", value: error.message || "Unknown error", inline: false },
+          { name: "Stack Trace", value: (error.stack || "No stack trace").slice(0, 1000), inline: false }
+        ]
+      })
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -33,17 +46,56 @@ export async function PUT(request) {
     const { person } = await request.json();
     
     if (!DEFAULT_UPI_LIST.some(u => u.name === person)) {
+      await sendDiscordWebhook(
+        "⚠️ Invalid UPI Update Attempt",
+        createDiscordEmbed({
+          title: "Invalid UPI Person",
+          description: "Attempt to set invalid UPI person",
+          color: "#ff9900",
+          fields: [
+            { name: "Admin Email", value: admin.email, inline: true },
+            { name: "Attempted Value", value: person, inline: true }
+          ]
+        })
+      );
       return NextResponse.json(
         { error: "Invalid UPI person selected" },
         { status: 400 }
       );
     }
 
+    const previousPerson = admin.currentUpiPerson;
     await Admin.findByIdAndUpdate(admin._id, { currentUpiPerson: person });
+    
+    await sendDiscordWebhook(
+      "💳 UPI Account Changed",
+      createDiscordEmbed({
+        title: "UPI Payment Account Updated",
+        description: "The active UPI payment account has been changed",
+        color: "#00ff00",
+        fields: [
+          { name: "Changed By", value: admin.email, inline: true },
+          { name: "Previous Account", value: previousPerson, inline: true },
+          { name: "New Account", value: person, inline: true }
+        ]
+      })
+    );
     
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error in UPI PUT route:", error);
+    await sendDiscordWebhook(
+      "❌ UPI Update Error",
+      createDiscordEmbed({
+        title: "UPI System Error",
+        description: "Error occurred while updating UPI person",
+        color: "#ff0000",
+        fields: [
+          { name: "Error Message", value: error.message || "Unknown error", inline: false },
+          { name: "Stack Trace", value: (error.stack || "No stack trace").slice(0, 1000), inline: false }
+        ]
+      })
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
