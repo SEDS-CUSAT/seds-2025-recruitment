@@ -22,6 +22,6 @@ npm run dev
 
 ## Environment Variables
 
-- `MONGODB_URI`: MongoDB connection string for storing application data.
-- `JWT_SECRET`: Secret key for signing JWT tokens.
-- `DISCORD_WEBHOOK_URL`: Webhook URL for sending logs to Discord.
+- `MONGODB_URI` : MongoDB connection string for storing application data.
+- `JWT_SECRET` : Secret key for signing JWT tokens.
+- `DISCORD_WEBHOOK_URL` : Webhook URL for sending logs to Discord.
