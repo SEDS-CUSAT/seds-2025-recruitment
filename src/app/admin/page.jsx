@@ -150,7 +150,7 @@ export default function AdminDashboard() {
   async function handleUpiChange(value) {
     try {
       const res = await fetch("/api/admin/upi", {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -376,7 +376,11 @@ export default function AdminDashboard() {
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
               <div className="w-full sm:w-[280px]">
                 <Select value={selectedUpi} onValueChange={handleUpiChange}>
-                  <SelectTrigger>
+                  <SelectTrigger className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                      <rect width="20" height="14" x="2" y="5" rx="2"/>
+                      <path d="M2 10h20"/>
+                    </svg>
                     <SelectValue placeholder="Select UPI Account" />
                   </SelectTrigger>
                   <SelectContent>
@@ -388,18 +392,39 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleLogout} variant="outline" className="w-full sm:w-auto">Logout</Button>
+              <Button 
+                onClick={handleLogout} 
+                variant="outline" 
+                className="w-full sm:w-auto bg-red-600/90 hover:bg-red-600"
+              >
+                Logout
+              </Button>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full">
             <div className="flex-[2]">
-              <Input
-                placeholder="Search by name, userId, ..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
+              <div className="relative w-full">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+                >
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.3-4.3"/>
+                </svg>
+                <Input
+                  placeholder="Search by name, userId, ..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10"
+                />
+              </div>
             </div>
             <div className="flex-[1.5]">
               <Select value={filterTeam} onValueChange={setFilterTeam}>
