@@ -26,17 +26,40 @@ import { Toaster } from "@/components/ui/toaster";
 import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
 
-import { DEPARTMENTS, TEAMS, MAX_FILE_SIZE } from "@/lib/constants";
+import { DEPARTMENTS, TEAMS, MAX_FILE_SIZE, DEFAULT_UPI_LIST } from "@/lib/constants";
 
 export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentImage, setPaymentImage] = useState(null);
+  const [currentUpi, setCurrentUpi] = useState(DEFAULT_UPI_LIST[0]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchUpiData();
+  }, []);
+
+  const fetchUpiData = async () => {
+    try {
+      const res = await fetch("/api/admin/upi");
+      const data = await res.json();
+      if (data.person && data.details) {
+        setCurrentUpi(data.details);
+      } else {
+        setCurrentUpi(DEFAULT_UPI_LIST[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching UPI data:', error);
+      setCurrentUpi(DEFAULT_UPI_LIST[0]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDownloadQR = () => {
     const link = document.createElement("a");
-    link.href = "/payment-upi-qr-2.jpg";
+    link.href = currentUpi.imagePath;
     link.download = "seds2025-payment-upi-qrcode.jpg";
     document.body.appendChild(link);
     link.click();
@@ -49,7 +72,7 @@ export default function Home() {
   };
 
   const handleCopyUPI = () => {
-    navigator.clipboard.writeText("kailas0sachdev@oksbi");
+    navigator.clipboard.writeText(currentUpi.upiId);
     toast({
       title: "Copied!",
       description: "UPI ID copied to clipboard",
@@ -226,6 +249,15 @@ export default function Home() {
             </p>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 space-y-4">
+        <div className="w-12 h-12 border-4 border-t-blue-500 border-r-transparent border-b-purple-500 border-l-transparent rounded-full animate-spin"></div>
+        <p className="text-muted-foreground animate-pulse">Fueling your space station...</p>
       </div>
     );
   }
@@ -465,7 +497,7 @@ export default function Home() {
                     <p className="text-base sm:text-lg">
                       UPI&nbsp;ID:&nbsp;
                       <span className="font-mono font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        kailas0sachdev@oksbi
+                        {currentUpi.upiId}
                       </span>
                     </p>
                     <Button
@@ -506,7 +538,7 @@ export default function Home() {
                   </p>
                   <div className="space-y-2 w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px]">
                     <Image
-                      src="/payment-upi-qr-2.jpg"
+                      src={currentUpi.imagePath}
                       alt="Payment QR Code"
                       width={400}
                       height={400}

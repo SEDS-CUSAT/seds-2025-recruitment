@@ -39,6 +39,19 @@ const TEAMS = [
   "Tech",
 ];
 
+const DEFAULT_UPI_LIST = [
+  {
+    name: "abitha",
+    upiId: "abithabala20@oksbi",
+    imagePath: "/payment-upi-qr.jpg"
+  },
+  {
+    name: "kailas",
+    upiId: "kalias0sachdev@oksbi",
+    imagePath: "/payment-upi-qr-2.jpg"
+  }
+];
+
 const MAX_FILE_SIZE = 512000;
 
-export { DEPARTMENTS, TEAMS, MAX_FILE_SIZE };
+export { DEPARTMENTS, TEAMS, MAX_FILE_SIZE, DEFAULT_UPI_LIST };

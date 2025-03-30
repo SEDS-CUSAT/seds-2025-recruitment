@@ -10,6 +10,10 @@ const adminSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  currentUpiPerson: {
+    type: String,
+    required: true,
+  },
   deviceTokens: [{
     token: {
       type: String,

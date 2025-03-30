@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { DEPARTMENTS, TEAMS } from "@/lib/constants";
+import { DEPARTMENTS, TEAMS, DEFAULT_UPI_LIST } from "@/lib/constants";
 
 export default function AdminDashboard() {
   const [applicants, setApplicants] = useState([]);
@@ -28,11 +28,13 @@ export default function AdminDashboard() {
   const [actionType, setActionType] = useState("");
   const [fullscreenImage, setFullscreenImage] = useState(false);
   const [counts, setCounts] = useState({ pending: 0, verified: 0, rejected: 0 });
+  const [selectedUpi, setSelectedUpi] = useState("");
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
     fetchApplicants();
+    fetchUpiData();
   }, []);
 
   useEffect(() => {
@@ -144,6 +146,67 @@ export default function AdminDashboard() {
       setActionLoading(false);
     }
   }
+
+  async function handleUpiChange(value) {
+    try {
+      const res = await fetch("/api/admin/upi", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ person: value }),
+      });
+      
+      if (res.status === 401) {
+        await handleLogout();
+        return;
+      }
+
+      if (!res.ok) throw new Error("Failed to update UPI person");
+      setSelectedUpi(value);
+      
+      toast({
+        title: "Success",
+        description: "UPI person updated successfully",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Error updating UPI person:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update UPI person",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function fetchUpiData() {
+    try {
+      const res = await fetch("/api/admin/upi");
+      
+      if (res.status === 401) {
+        await handleLogout();
+        return;
+      }
+
+      if (!res.ok) throw new Error("Failed to fetch UPI data");
+      
+      const data = await res.json();
+      setSelectedUpi(data.person);
+    } catch (error) {
+      console.error("Error fetching UPI data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch UPI data",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Fetch UPI data when component mounts
+  useEffect(() => {
+    fetchUpiData();
+  }, []);
 
   const filteredApplicants = applicants.filter(applicant => {
     const matchesStatus = filterStatus === "all" || applicant.status === filterStatus;
@@ -296,33 +359,10 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
-        <div className="relative">
-          <svg
-            className="animate-spin h-12 w-12 text-primary"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="3"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-        </div>
-        <div className="text-center space-y-2">
-          <p className="text-lg font-medium text-primary animate-pulse">Loading applications...</p>
-          <p className="text-sm text-muted-foreground">Please wait while we fetch the data</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 space-y-4">
+        <div className="w-12 h-12 border-4 border-t-blue-500 border-r-transparent border-b-purple-500 border-l-transparent rounded-full animate-spin"></div>
+        <p className="text-muted-foreground animate-pulse">Loading astronauts 🧑‍🚀</p>
+        <p className="text-sm text-muted-foreground">Please wait while we fetch the data</p>
       </div>
     );
   }
@@ -333,7 +373,23 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <h1 className="text-2xl font-bold text-center sm:text-left">Admin Dashboard</h1>
-            <Button onClick={handleLogout} variant="outline" className="w-full sm:w-auto bg-red-600/80 hover:bg-red-600">Logout</Button>
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+              <div className="w-full sm:w-[280px]">
+                <Select value={selectedUpi} onValueChange={handleUpiChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select UPI Account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEFAULT_UPI_LIST.map((upi) => (
+                      <SelectItem key={upi.name} value={upi.name}>
+                        {upi.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleLogout} variant="outline" className="w-full sm:w-auto">Logout</Button>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full">
