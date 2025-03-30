@@ -6,9 +6,12 @@ import { createDiscordEmbed, sendDiscordWebhook } from '@/lib/sendWebhook';
 
 export async function GET(request) {
   try {
-    const admin = await verifyAuth();
+    const admin = await Admin.findOne({});
     if (!admin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ 
+        person: DEFAULT_UPI_LIST[0].name, 
+        details: DEFAULT_UPI_LIST[0] 
+      });
     }
 
     const currentUpiPerson = admin.currentUpiPerson;
