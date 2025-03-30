@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
   const [applicants, setApplicants] = useState([]);
@@ -22,12 +21,21 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionType, setActionType] = useState("");
   const [fullscreenImage, setFullscreenImage] = useState(false);
+  const [counts, setCounts] = useState({ pending: 0, verified: 0, rejected: 0 });
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
     fetchApplicants();
   }, []);
+
+  useEffect(() => {
+    setCounts({
+      pending: applicants.filter(a => a.status === "pending").length,
+      verified: applicants.filter(a => a.status === "verified").length,
+      rejected: applicants.filter(a => a.status === "rejected").length
+    });
+  }, [applicants]);
 
   useEffect(() => {
     if (fullscreenImage) {
@@ -41,7 +49,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch("/api/admin/applicants");
       if (res.status === 401) {
-        router.push("/admin/login");
+        await handleLogout();
         return;
       }
       const data = await res.json();
@@ -315,10 +323,10 @@ export default function AdminDashboard() {
           
           <Tabs value={filterStatus} onValueChange={setFilterStatus} className="w-full">
             <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 p-1 min-h-[88px] sm:min-h-0">
-              <TabsTrigger value="all" className="py-2.5">All</TabsTrigger>
-              <TabsTrigger value="pending" className="py-2.5">Pending</TabsTrigger>
-              <TabsTrigger value="verified" className="py-2.5">Verified</TabsTrigger>
-              <TabsTrigger value="rejected" className="py-2.5">Rejected</TabsTrigger>
+              <TabsTrigger value="all" className="py-2.5">All ({applicants.length})</TabsTrigger>
+              <TabsTrigger value="pending" className="py-2.5">Pending ({counts.pending})</TabsTrigger>
+              <TabsTrigger value="verified" className="py-2.5">Verified ({counts.verified})</TabsTrigger>
+              <TabsTrigger value="rejected" className="py-2.5">Rejected ({counts.rejected})</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
