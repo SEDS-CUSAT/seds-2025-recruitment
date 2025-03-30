@@ -373,7 +373,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <h1 className="text-2xl font-bold text-center sm:text-left">Admin Dashboard</h1>
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <div className="flex flex-col-reverse sm:flex-row items-center gap-4 w-full sm:w-auto">
               <div className="w-full sm:w-[280px]">
                 <Select value={selectedUpi} onValueChange={handleUpiChange}>
                   <SelectTrigger className="flex items-center gap-2">
