@@ -36,7 +36,7 @@ export default function Home() {
 
   const handleDownloadQR = () => {
     const link = document.createElement("a");
-    link.href = "/payment-upi-qr.jpg";
+    link.href = "/payment-upi-qr-2.jpg";
     link.download = "seds2025-payment-upi-qrcode.jpg";
     document.body.appendChild(link);
     link.click();
@@ -49,7 +49,7 @@ export default function Home() {
   };
 
   const handleCopyUPI = () => {
-    navigator.clipboard.writeText("abithabala20@oksbi");
+    navigator.clipboard.writeText("kailas0sachdev@oksbi");
     toast({
       title: "Copied!",
       description: "UPI ID copied to clipboard",
@@ -465,7 +465,7 @@ export default function Home() {
                     <p className="text-base sm:text-lg">
                       UPI&nbsp;ID:&nbsp;
                       <span className="font-mono font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        abithabala20@oksbi
+                        kailas0sachdev@oksbi
                       </span>
                     </p>
                     <Button
@@ -506,7 +506,7 @@ export default function Home() {
                   </p>
                   <div className="space-y-2 w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px]">
                     <Image
-                      src="/payment-upi-qr.jpg"
+                      src="/payment-upi-qr-2.jpg"
                       alt="Payment QR Code"
                       width={400}
                       height={400}
