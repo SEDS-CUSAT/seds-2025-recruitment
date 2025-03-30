@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +14,16 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { DEPARTMENTS, TEAMS } from "@/lib/constants";
 
 export default function AdminDashboard() {
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterTeam, setFilterTeam] = useState("all");
+  const [filterDepartment, setFilterDepartment] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionType, setActionType] = useState("");
   const [fullscreenImage, setFullscreenImage] = useState(false);
@@ -139,9 +145,18 @@ export default function AdminDashboard() {
     }
   }
 
-  const filteredApplicants = applicants.filter(applicant => 
-    filterStatus === "all" || applicant.status === filterStatus
-  );
+  const filteredApplicants = applicants.filter(applicant => {
+    const matchesStatus = filterStatus === "all" || applicant.status === filterStatus;
+    const matchesTeam = filterTeam === "all" || applicant.team === filterTeam;
+    const matchesDepartment = filterDepartment === "all" || applicant.department === filterDepartment;
+    const matchesSearch = searchQuery === "" || 
+      applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      applicant.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      applicant.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      applicant.team.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesStatus && matchesTeam && matchesDepartment && matchesSearch;
+  });
 
   const getStatusBadgeVariant = (status) => {
     switch (status) {
@@ -318,7 +333,44 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <h1 className="text-2xl font-bold text-center sm:text-left">Admin Dashboard</h1>
-            <Button onClick={handleLogout} variant="outline" className="w-full sm:w-auto">Logout</Button>
+            <Button onClick={handleLogout} variant="outline" className="w-full sm:w-auto bg-red-600/80 hover:bg-red-600">Logout</Button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
+            <div className="flex-[2]">
+              <Input
+                placeholder="Search by name, userId, ..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="flex-[1.5]">
+              <Select value={filterTeam} onValueChange={setFilterTeam}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filter by team" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Teams</SelectItem>
+                  {TEAMS.map((team) => (
+                    <SelectItem key={team} value={team}>{team}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-[2.5]">
+              <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filter by department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {DEPARTMENTS.map((dept) => (
+                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <Tabs value={filterStatus} onValueChange={setFilterStatus} className="w-full">
