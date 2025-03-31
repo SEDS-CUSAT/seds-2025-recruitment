@@ -5,6 +5,8 @@ import { DEFAULT_UPI_LIST } from "@/lib/constants";
 import { createDiscordEmbed, sendDiscordWebhook } from '@/lib/sendWebhook';
 import connectDB from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     await connectDB();
