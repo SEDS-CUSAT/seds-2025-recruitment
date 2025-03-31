@@ -42,7 +42,13 @@ export default function Home() {
 
   const fetchUpiData = async () => {
     try {
-      const res = await fetch("/api/admin/upi");
+      const res = await fetch("/api/admin/upi", {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await res.json();
       if (data.person && data.details) {
         setCurrentUpi(data.details);

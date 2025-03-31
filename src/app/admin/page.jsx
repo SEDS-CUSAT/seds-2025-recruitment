@@ -218,8 +218,19 @@ export default function AdminDashboard() {
       applicant.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
       applicant.team.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return matchesStatus && matchesTeam && matchesDepartment && matchesSearch;
+    return matchesTeam && matchesDepartment && matchesSearch;
   });
+
+  const filteredCounts = {
+    all: filteredApplicants.length,
+    pending: filteredApplicants.filter(a => a.status === "pending").length,
+    verified: filteredApplicants.filter(a => a.status === "verified").length,
+    rejected: filteredApplicants.filter(a => a.status === "rejected").length
+  };
+
+  const displayedApplicants = filterStatus === "all" 
+    ? filteredApplicants 
+    : filteredApplicants.filter(applicant => applicant.status === filterStatus);
 
   const getStatusBadgeVariant = (status) => {
     switch (status) {
@@ -456,16 +467,16 @@ export default function AdminDashboard() {
           
           <Tabs value={filterStatus} onValueChange={setFilterStatus} className="w-full">
             <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 p-1 min-h-[88px] sm:min-h-0">
-              <TabsTrigger value="all" className="py-2.5">All ({applicants.length})</TabsTrigger>
-              <TabsTrigger value="pending" className="py-2.5">Pending ({counts.pending})</TabsTrigger>
-              <TabsTrigger value="verified" className="py-2.5">Verified ({counts.verified})</TabsTrigger>
-              <TabsTrigger value="rejected" className="py-2.5">Rejected ({counts.rejected})</TabsTrigger>
+              <TabsTrigger value="all" className="py-2.5">All ({filteredCounts.all})</TabsTrigger>
+              <TabsTrigger value="pending" className="py-2.5">Pending ({filteredCounts.pending})</TabsTrigger>
+              <TabsTrigger value="verified" className="py-2.5">Verified ({filteredCounts.verified})</TabsTrigger>
+              <TabsTrigger value="rejected" className="py-2.5">Rejected ({filteredCounts.rejected})</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredApplicants.map((applicant) => (
+          {displayedApplicants.map((applicant) => (
             <div
               key={applicant.userId}
               className={`border rounded-lg p-4 shadow-sm transition-colors cursor-pointer hover:shadow-md ${getCardStyle(applicant.status)}`}
