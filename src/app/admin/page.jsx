@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { DEPARTMENTS, TEAMS, DEFAULT_UPI_LIST } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export default function AdminDashboard() {
   const [applicants, setApplicants] = useState([]);
@@ -238,7 +239,6 @@ export default function AdminDashboard() {
     }
   }
 
-  // Fetch UPI data when component mounts
   useEffect(() => {
     fetchUpiData();
   }, []);
@@ -566,32 +566,17 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-              <Button
-                variant="outline"
-                className={cn(
-                  "border-purple-500/20",
-                  showDuplicatesOnly &&
-                    "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20"
-                )}
-                onClick={() => setShowDuplicatesOnly(!showDuplicatesOnly)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4 mr-2"
-                >
-                  <path d="M15 3v18" />
-                  <rect x="1" y="7" width="14" height="12" rx="2" />
-                  <path d="M11 7v12" />
-                </svg>
-                {showDuplicatesOnly ? "Show All" : "Show Duplicates"}
-              </Button>
+              <Link href="/admin"><h1 className="text-2xl font-bold hover:text-violet-600">Admin Dashboard</h1></Link>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showDuplicatesOnly}
+                  onCheckedChange={setShowDuplicatesOnly}
+                  className="data-[state=checked]:bg-violet-500"
+                />
+                <span className="text-sm text-muted-foreground">
+                  {showDuplicatesOnly ? "Showing Duplicates" : "Show Duplicates"}
+                </span>
+              </div>
             </div>
             <div className="flex flex-col-reverse sm:flex-row items-center gap-4 w-full sm:w-auto">
               <div className="w-full sm:w-[280px]">
@@ -729,7 +714,7 @@ export default function AdminDashboard() {
                       <h2 className="font-semibold truncate">{applicant.name}</h2>
                       <p className="text-sm text-muted-foreground truncate">ID: {applicant.userId}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                    <div className="flex flex-col items-center gap-2">
                       <Badge variant="outline" className={`${getStatusBadgeVariant(applicant.status)} shrink-0`}>
                         {applicant.status}
                       </Badge>
@@ -738,7 +723,7 @@ export default function AdminDashboard() {
                           variant="outline" 
                           className={`${getDuplicateBadgeVariant()} shrink-0`}
                         >
-                          Duplicate
+                          repeated
                         </Badge>
                       )}
                     </div>
@@ -823,7 +808,7 @@ export default function AdminDashboard() {
                       </Badge>
                       {isDuplicate(selectedApplicant, getDuplicateInfo(applicants).emailGroups, getDuplicateInfo(applicants).transactionGroups) && (
                         <Badge variant="outline" className={getDuplicateBadgeVariant()}>
-                          Duplicate
+                          duplicate
                         </Badge>
                       )}
                       </div>
