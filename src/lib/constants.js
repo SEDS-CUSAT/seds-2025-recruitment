@@ -1,5 +1,6 @@
 const DEPARTMENTS = [
   "Cochin University College of Engineering Kuttanad (CUCEK)",
+  "DDU Kaushal Kendra (DDUKK)",
   "Department of Applied Economics",
   "Department of Atmospheric Science",
   "Department of Biotechnology",
