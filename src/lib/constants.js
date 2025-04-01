@@ -55,6 +55,11 @@ const DEFAULT_UPI_LIST = [
     name: "deepak",
     upiId: "deepakmk010@oksbi",
     imagePath: "/payment-upi-qr-3.jpg"
+  },
+  {
+    name: "asiya",
+    upiId: "asiyafyroos@oksbi",
+    imagePath: "/payment-upi-qr-4.jpg"
   }
 ];
 
