@@ -284,15 +284,38 @@ export default function AdminDashboard() {
   ]);
 
   const filteredCounts = useMemo(
-    () => ({
-      all: filteredApplicants.length,
-      pending: filteredApplicants.filter((a) => a.status === "pending").length,
-      verified: filteredApplicants.filter((a) => a.status === "verified")
-        .length,
-      rejected: filteredApplicants.filter((a) => a.status === "rejected")
-        .length,
-    }),
-    [filteredApplicants]
+    () => {
+      if (filterStatus !== "all") {
+        const filteredByOtherCriteria = applicants.filter((applicant) => {
+          const matchesTeam = filterTeam === "all" || applicant.team === filterTeam;
+          const matchesDepartment = filterDepartment === "all" || applicant.department === filterDepartment;
+          const matchesSearch = searchQuery === "" ||
+            applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            applicant.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            applicant.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            applicant.team.toLowerCase().includes(searchQuery.toLowerCase());
+          const { emailGroups, transactionGroups } = getDuplicateInfo(applicants);
+          const matchesDuplicate = !showDuplicatesOnly || isDuplicate(applicant, emailGroups, transactionGroups);
+
+          return matchesTeam && matchesDepartment && matchesSearch && (!showDuplicatesOnly || matchesDuplicate);
+        });
+
+        return {
+          all: filteredByOtherCriteria.length,
+          pending: filteredByOtherCriteria.filter(a => a.status === "pending").length,
+          verified: filteredByOtherCriteria.filter(a => a.status === "verified").length,
+          rejected: filteredByOtherCriteria.filter(a => a.status === "rejected").length,
+        };
+      }
+
+      return {
+        all: filteredApplicants.length,
+        pending: filteredApplicants.filter(a => a.status === "pending").length,
+        verified: filteredApplicants.filter(a => a.status === "verified").length,
+        rejected: filteredApplicants.filter(a => a.status === "rejected").length,
+      };
+    },
+    [filteredApplicants, filterStatus, filterTeam, filterDepartment, searchQuery, showDuplicatesOnly, applicants, getDuplicateInfo, isDuplicate]
   );
 
   const getStatusBadgeVariant = (status) => {

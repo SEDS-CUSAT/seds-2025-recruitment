@@ -10,7 +10,11 @@ export async function GET() {
     await verifyAuth();
     await connectDB();
     
-    const applicants = await Applicant.find({}).sort({ createdAt: -1 });
+    const applicants = await Applicant.find({})
+      .hint({ createdAt: -1 })
+      .allowDiskUse(true)
+      .sort({ createdAt: -1 });
+      
     return NextResponse.json({ applicants });
   } catch (error) {
     cookies().delete('admin-token');
