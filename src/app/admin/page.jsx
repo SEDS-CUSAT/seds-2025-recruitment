@@ -23,10 +23,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { DEPARTMENTS, TEAMS, DEFAULT_UPI_LIST } from "@/lib/constants";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
-  const [applicants, setApplicants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [applicants, setApplicants] = useState({});
+  const [loadingTeams, setLoadingTeams] = useState(new Set());
+  const [loadedTeams, setLoadedTeams] = useState(new Set());
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterTeam, setFilterTeam] = useState("all");
@@ -48,14 +50,15 @@ export default function AdminDashboard() {
   const getDuplicateInfo = useCallback((applicants) => {
     const emailGroups = {};
     const transactionGroups = {};
-    
-    applicants.forEach(app => {
+
+    applicants.forEach((app) => {
       if (app.email) {
         if (!emailGroups[app.email]) emailGroups[app.email] = [];
         emailGroups[app.email].push(app.userId);
       }
       if (app.transactionId) {
-        if (!transactionGroups[app.transactionId]) transactionGroups[app.transactionId] = [];
+        if (!transactionGroups[app.transactionId])
+          transactionGroups[app.transactionId] = [];
         transactionGroups[app.transactionId].push(app.userId);
       }
     });
@@ -63,21 +66,26 @@ export default function AdminDashboard() {
     return { emailGroups, transactionGroups };
   }, []);
 
-  const isDuplicate = useCallback((applicant, emailGroups, transactionGroups) => {
-    return (emailGroups[applicant.email]?.length > 1) || 
-           (transactionGroups[applicant.transactionId]?.length > 1);
-  }, []);
+  const isDuplicate = useCallback(
+    (applicant, emailGroups, transactionGroups) => {
+      return (
+        emailGroups[applicant.email]?.length > 1 ||
+        transactionGroups[applicant.transactionId]?.length > 1
+      );
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchApplicants();
     fetchUpiData();
   }, []);
 
   useEffect(() => {
+    const allApplicants = Object.values(applicants).flat();
     setCounts({
-      pending: applicants.filter((a) => a.status === "pending").length,
-      verified: applicants.filter((a) => a.status === "verified").length,
-      rejected: applicants.filter((a) => a.status === "rejected").length,
+      pending: allApplicants.filter((a) => a.status === "pending").length,
+      verified: allApplicants.filter((a) => a.status === "verified").length,
+      rejected: allApplicants.filter((a) => a.status === "rejected").length,
     });
   }, [applicants]);
 
@@ -89,23 +97,41 @@ export default function AdminDashboard() {
     }
   }, [fullscreenImage]);
 
-  async function fetchApplicants() {
+  async function fetchApplicantsByTeam(team) {
     try {
-      const res = await fetch("/api/admin/applicants");
+      setLoadingTeams((prev) => new Set([...prev, team]));
+      const res = await fetch(
+        `/api/admin/applicants?team=${encodeURIComponent(team)}`
+      );
       if (res.status === 401) {
         await handleLogout();
         return;
       }
       const data = await res.json();
-      setApplicants(data.applicants);
+
+      setApplicants((prev) => ({
+        ...prev,
+        [team]: data.applicants,
+      }));
+
+      setLoadingTeams((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(team);
+        return newSet;
+      });
+      setLoadedTeams((prev) => new Set([...prev, team]));
     } catch (error) {
+      console.error(`Error fetching ${team} team:`, error);
       toast({
         title: "Error",
-        description: "Failed to fetch applicants",
+        description: `Failed to fetch ${team} team data`,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      setLoadingTeams((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(team);
+        return newSet;
+      });
     }
   }
 
@@ -128,7 +154,17 @@ export default function AdminDashboard() {
         variant: "success",
       });
 
-      fetchApplicants();
+      setApplicants((prev) => {
+        const updatedApplicants = { ...prev };
+        Object.keys(updatedApplicants).forEach((team) => {
+          updatedApplicants[team] = updatedApplicants[team].map((applicant) =>
+            applicant.userId === userId
+              ? { ...applicant, status }
+              : applicant
+          );
+        });
+        return updatedApplicants;
+      });
       setSelectedApplicant(null);
     } catch (error) {
       toast({
@@ -170,7 +206,15 @@ export default function AdminDashboard() {
         variant: "success",
       });
 
-      fetchApplicants();
+      setApplicants((prev) => {
+        const updatedApplicants = { ...prev };
+        Object.keys(updatedApplicants).forEach((team) => {
+          updatedApplicants[team] = updatedApplicants[team].filter(
+            (applicant) => applicant.userId !== userId
+          );
+        });
+        return updatedApplicants;
+      });
       setSelectedApplicant(null);
     } catch (error) {
       toast({
@@ -244,9 +288,10 @@ export default function AdminDashboard() {
   }, []);
 
   const filteredApplicants = useMemo(() => {
-    const { emailGroups, transactionGroups } = getDuplicateInfo(applicants);
+    const allApplicants = Object.values(applicants).flat();
+    const { emailGroups, transactionGroups } = getDuplicateInfo(allApplicants);
 
-    return applicants.filter((applicant) => {
+    return allApplicants.filter((applicant) => {
       const matchesStatus =
         filterStatus === "all" || applicant.status === filterStatus;
       const matchesTeam = filterTeam === "all" || applicant.team === filterTeam;
@@ -283,40 +328,71 @@ export default function AdminDashboard() {
     isDuplicate,
   ]);
 
-  const filteredCounts = useMemo(
-    () => {
-      if (filterStatus !== "all") {
-        const filteredByOtherCriteria = applicants.filter((applicant) => {
-          const matchesTeam = filterTeam === "all" || applicant.team === filterTeam;
-          const matchesDepartment = filterDepartment === "all" || applicant.department === filterDepartment;
-          const matchesSearch = searchQuery === "" ||
-            applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            applicant.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            applicant.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            applicant.team.toLowerCase().includes(searchQuery.toLowerCase());
-          const { emailGroups, transactionGroups } = getDuplicateInfo(applicants);
-          const matchesDuplicate = !showDuplicatesOnly || isDuplicate(applicant, emailGroups, transactionGroups);
+  const filteredCounts = useMemo(() => {
+    const allApplicants = Object.values(applicants).flat();
+    if (filterStatus !== "all") {
+      const filteredByOtherCriteria = allApplicants.filter((applicant) => {
+        const matchesTeam =
+          filterTeam === "all" || applicant.team === filterTeam;
+        const matchesDepartment =
+          filterDepartment === "all" ||
+          applicant.department === filterDepartment;
+        const matchesSearch =
+          searchQuery === "" ||
+          applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          applicant.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          applicant.department
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          applicant.team.toLowerCase().includes(searchQuery.toLowerCase());
+        const { emailGroups, transactionGroups } = getDuplicateInfo(
+          allApplicants
+        );
+        const matchesDuplicate =
+          !showDuplicatesOnly ||
+          isDuplicate(applicant, emailGroups, transactionGroups);
 
-          return matchesTeam && matchesDepartment && matchesSearch && (!showDuplicatesOnly || matchesDuplicate);
-        });
-
-        return {
-          all: filteredByOtherCriteria.length,
-          pending: filteredByOtherCriteria.filter(a => a.status === "pending").length,
-          verified: filteredByOtherCriteria.filter(a => a.status === "verified").length,
-          rejected: filteredByOtherCriteria.filter(a => a.status === "rejected").length,
-        };
-      }
+        return (
+          matchesTeam &&
+          matchesDepartment &&
+          matchesSearch &&
+          (!showDuplicatesOnly || matchesDuplicate)
+        );
+      });
 
       return {
-        all: filteredApplicants.length,
-        pending: filteredApplicants.filter(a => a.status === "pending").length,
-        verified: filteredApplicants.filter(a => a.status === "verified").length,
-        rejected: filteredApplicants.filter(a => a.status === "rejected").length,
+        all: filteredByOtherCriteria.length,
+        pending: filteredByOtherCriteria.filter(
+          (a) => a.status === "pending"
+        ).length,
+        verified: filteredByOtherCriteria.filter(
+          (a) => a.status === "verified"
+        ).length,
+        rejected: filteredByOtherCriteria.filter(
+          (a) => a.status === "rejected"
+        ).length,
       };
-    },
-    [filteredApplicants, filterStatus, filterTeam, filterDepartment, searchQuery, showDuplicatesOnly, applicants, getDuplicateInfo, isDuplicate]
-  );
+    }
+
+    return {
+      all: filteredApplicants.length,
+      pending: filteredApplicants.filter((a) => a.status === "pending").length,
+      verified: filteredApplicants.filter((a) => a.status === "verified")
+        .length,
+      rejected: filteredApplicants.filter((a) => a.status === "rejected")
+        .length,
+    };
+  }, [
+    filteredApplicants,
+    filterStatus,
+    filterTeam,
+    filterDepartment,
+    searchQuery,
+    showDuplicatesOnly,
+    applicants,
+    getDuplicateInfo,
+    isDuplicate,
+  ]);
 
   const getStatusBadgeVariant = (status) => {
     switch (status) {
@@ -569,7 +645,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) {
+  if (loadingTeams.size === TEAMS.length) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-8 space-y-4">
         <div className="w-12 h-12 border-4 border-t-blue-500 border-r-transparent border-b-purple-500 border-l-transparent rounded-full animate-spin"></div>
@@ -589,7 +665,11 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Link href="/admin"><h1 className="text-2xl font-bold hover:text-violet-600">Admin Dashboard</h1></Link>
+              <Link href="/admin">
+                <h1 className="text-2xl font-bold hover:text-violet-600">
+                  Admin Dashboard
+                </h1>
+              </Link>
               <div className="flex items-center gap-2">
                 <Switch
                   checked={showDuplicatesOnly}
@@ -720,30 +800,105 @@ export default function AdminDashboard() {
           </Tabs>
         </div>
 
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-4">
+          {TEAMS.map((team) => (
+            <Button
+              key={team}
+              variant={loadedTeams.has(team) ? "default" : "outline"}
+              className={cn(
+                "relative",
+                loadedTeams.has(team) &&
+                  "bg-primary/10 hover:bg-primary/20 text-primary",
+                loadingTeams.has(team) && "pointer-events-none"
+              )}
+              onClick={() => {
+                if (!loadedTeams.has(team) && !loadingTeams.has(team)) {
+                  fetchApplicantsByTeam(team);
+                }
+              }}
+            >
+              {loadingTeams.has(team) && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-md">
+                  <svg
+                    className="animate-spin h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                </div>
+              )}
+              <span
+                className={cn(
+                  "truncate",
+                  loadedTeams.has(team) && "font-medium"
+                )}
+              >
+                {team}
+              </span>
+              {loadedTeams.has(team) && (
+                <span className="ml-1.5 text-xs">
+                  ({(applicants[team] || []).length})
+                </span>
+              )}
+            </Button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredApplicants.map((applicant) => {
-            const { emailGroups, transactionGroups } = getDuplicateInfo(applicants);
-            const hasDuplicate = isDuplicate(applicant, emailGroups, transactionGroups);
-            
+            const allApplicants = Object.values(applicants).flat();
+            const { emailGroups, transactionGroups } =
+              getDuplicateInfo(allApplicants);
+            const hasDuplicate = isDuplicate(
+              applicant,
+              emailGroups,
+              transactionGroups
+            );
+
             return (
               <div
                 key={applicant.userId}
-                className={`border rounded-lg p-4 shadow-sm transition-colors cursor-pointer hover:shadow-md ${getCardStyle(applicant.status)}`}
+                className={`border rounded-lg p-4 shadow-sm transition-colors cursor-pointer hover:shadow-md ${getCardStyle(
+                  applicant.status
+                )}`}
                 onClick={() => setSelectedApplicant(applicant)}
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <h2 className="font-semibold truncate">{applicant.name}</h2>
-                      <p className="text-sm text-muted-foreground truncate">ID: {applicant.userId}</p>
+                      <h2 className="font-semibold truncate">
+                        {applicant.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground truncate">
+                        ID: {applicant.userId}
+                      </p>
                     </div>
                     <div className="flex flex-col items-center gap-2">
-                      <Badge variant="outline" className={`${getStatusBadgeVariant(applicant.status)} shrink-0`}>
+                      <Badge
+                        variant="outline"
+                        className={`${getStatusBadgeVariant(
+                          applicant.status
+                        )} shrink-0`}
+                      >
                         {applicant.status}
                       </Badge>
                       {hasDuplicate && (
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`${getDuplicateBadgeVariant()} shrink-0`}
                         >
                           repeated
@@ -824,16 +979,34 @@ export default function AdminDashboard() {
                 <DialogHeader className="p-4">
                   <DialogTitle className="text-xl font-semibold flex flex-col gap-2">
                     <div className="flex items-center gap-3 flex-wrap w-full">
-                      <span className="truncate">{selectedApplicant.name}</span>
+                      <span className="truncate">
+                        {selectedApplicant.name}
+                      </span>
                       <div className="flex items-center gap-[6px]">
-                      <Badge variant="outline" className={getStatusBadgeVariant(selectedApplicant.status)}>
-                        {selectedApplicant.status}
-                      </Badge>
-                      {isDuplicate(selectedApplicant, getDuplicateInfo(applicants).emailGroups, getDuplicateInfo(applicants).transactionGroups) && (
-                        <Badge variant="outline" className={getDuplicateBadgeVariant()}>
-                          duplicate
+                        <Badge
+                          variant="outline"
+                          className={getStatusBadgeVariant(
+                            selectedApplicant.status
+                          )}
+                        >
+                          {selectedApplicant.status}
                         </Badge>
-                      )}
+                        {isDuplicate(
+                          selectedApplicant,
+                          getDuplicateInfo(
+                            Object.values(applicants).flat()
+                          ).emailGroups,
+                          getDuplicateInfo(
+                            Object.values(applicants).flat()
+                          ).transactionGroups
+                        ) && (
+                          <Badge
+                            variant="outline"
+                            className={getDuplicateBadgeVariant()}
+                          >
+                            duplicate
+                          </Badge>
+                        )}
                       </div>
                     </div>
                     <div className="text-sm font-normal text-muted-foreground flex items-center gap-2">

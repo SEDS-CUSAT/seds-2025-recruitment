@@ -5,12 +5,17 @@ import Applicant from '@/lib/models/applicant';
 import { cookies } from 'next/headers';
 import { createDiscordEmbed, sendDiscordWebhook } from '@/lib/sendWebhook';
 
-export async function GET() {
+export async function GET(request) {
   try {
     await verifyAuth();
     await connectDB();
     
-    const applicants = await Applicant.find({})
+    const { searchParams } = new URL(request.url);
+    const team = searchParams.get('team');
+
+    const query = team ? { team } : {};
+    
+    const applicants = await Applicant.find(query)
       .hint({ createdAt: -1 })
       .allowDiskUse(true)
       .sort({ createdAt: -1 });
@@ -32,9 +37,16 @@ export async function GET() {
 
     await sendDiscordWebhook('', embed);
 
+    let status = 500;
+    if (error.message === 'Unauthorized') {
+      status = 401;
+    } else if (error.message === 'Forbidden') {
+      status = 403;
+    }
     return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
+      { error: error.message },
+      { status }
     );
   }
+
 }
