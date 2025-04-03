@@ -5,6 +5,8 @@ import Applicant from '@/lib/models/applicant';
 import { cookies } from 'next/headers';
 import { createDiscordEmbed, sendDiscordWebhook } from '@/lib/sendWebhook';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     await verifyAuth();
