@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { DEPARTMENTS, TEAMS, DEFAULT_UPI_LIST } from "@/lib/constants";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { PhoneIcon } from "lucide-react";
 
 export default function AdminDashboard() {
   const [applicants, setApplicants] = useState({});
@@ -50,15 +51,16 @@ export default function AdminDashboard() {
   const getDuplicateInfo = useCallback((applicants) => {
     const emailGroups = {};
     const transactionGroups = {};
+    
+    const allApplicants = Object.values(applicants).flat();
 
-    applicants.forEach((app) => {
+    allApplicants.forEach((app) => {
       if (app.email) {
         if (!emailGroups[app.email]) emailGroups[app.email] = [];
         emailGroups[app.email].push(app.userId);
       }
       if (app.transactionId) {
-        if (!transactionGroups[app.transactionId])
-          transactionGroups[app.transactionId] = [];
+        if (!transactionGroups[app.transactionId]) transactionGroups[app.transactionId] = [];
         transactionGroups[app.transactionId].push(app.userId);
       }
     });
@@ -158,9 +160,7 @@ export default function AdminDashboard() {
         const updatedApplicants = { ...prev };
         Object.keys(updatedApplicants).forEach((team) => {
           updatedApplicants[team] = updatedApplicants[team].map((applicant) =>
-            applicant.userId === userId
-              ? { ...applicant, status }
-              : applicant
+            applicant.userId === userId ? { ...applicant, status } : applicant
           );
         });
         return updatedApplicants;
@@ -288,45 +288,27 @@ export default function AdminDashboard() {
   }, []);
 
   const filteredApplicants = useMemo(() => {
+
     const allApplicants = Object.values(applicants).flat();
     const { emailGroups, transactionGroups } = getDuplicateInfo(allApplicants);
 
-    return allApplicants.filter((applicant) => {
-      const matchesStatus =
-        filterStatus === "all" || applicant.status === filterStatus;
+   
+    const filtered = allApplicants.filter((applicant) => {
+      const matchesStatus = filterStatus === "all" || applicant.status === filterStatus;
       const matchesTeam = filterTeam === "all" || applicant.team === filterTeam;
-      const matchesDepartment =
-        filterDepartment === "all" || applicant.department === filterDepartment;
-      const matchesDuplicate =
-        !showDuplicatesOnly ||
-        isDuplicate(applicant, emailGroups, transactionGroups);
-      const matchesSearch =
-        searchQuery === "" ||
+      const matchesDepartment = filterDepartment === "all" || applicant.department === filterDepartment;
+      const matchesDuplicate = !showDuplicatesOnly || isDuplicate(applicant, emailGroups, transactionGroups);
+      const matchesSearch = searchQuery === "" ||
         applicant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         applicant.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        applicant.department
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
+        applicant.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
         applicant.team.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return (
-        matchesStatus &&
-        matchesTeam &&
-        matchesDepartment &&
-        matchesSearch &&
-        (!showDuplicatesOnly || matchesDuplicate)
-      );
+      return matchesStatus && matchesTeam && matchesDepartment && matchesSearch && (!showDuplicatesOnly || matchesDuplicate);
     });
-  }, [
-    applicants,
-    filterStatus,
-    filterTeam,
-    filterDepartment,
-    searchQuery,
-    showDuplicatesOnly,
-    getDuplicateInfo,
-    isDuplicate,
-  ]);
+
+        return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [applicants, filterStatus, filterTeam, filterDepartment, searchQuery, showDuplicatesOnly, getDuplicateInfo, isDuplicate]);
 
   const filteredCounts = useMemo(() => {
     const allApplicants = Object.values(applicants).flat();
@@ -345,9 +327,8 @@ export default function AdminDashboard() {
             .toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
           applicant.team.toLowerCase().includes(searchQuery.toLowerCase());
-        const { emailGroups, transactionGroups } = getDuplicateInfo(
-          allApplicants
-        );
+        const { emailGroups, transactionGroups } =
+          getDuplicateInfo(allApplicants);
         const matchesDuplicate =
           !showDuplicatesOnly ||
           isDuplicate(applicant, emailGroups, transactionGroups);
@@ -362,15 +343,12 @@ export default function AdminDashboard() {
 
       return {
         all: filteredByOtherCriteria.length,
-        pending: filteredByOtherCriteria.filter(
-          (a) => a.status === "pending"
-        ).length,
-        verified: filteredByOtherCriteria.filter(
-          (a) => a.status === "verified"
-        ).length,
-        rejected: filteredByOtherCriteria.filter(
-          (a) => a.status === "rejected"
-        ).length,
+        pending: filteredByOtherCriteria.filter((a) => a.status === "pending")
+          .length,
+        verified: filteredByOtherCriteria.filter((a) => a.status === "verified")
+          .length,
+        rejected: filteredByOtherCriteria.filter((a) => a.status === "rejected")
+          .length,
       };
     }
 
@@ -677,7 +655,9 @@ export default function AdminDashboard() {
                   className="data-[state=checked]:bg-violet-500"
                 />
                 <span className="text-sm text-muted-foreground">
-                  {showDuplicatesOnly ? "Showing Duplicates" : "Show Duplicates"}
+                  {showDuplicatesOnly
+                    ? "Showing Duplicates"
+                    : "Show Duplicates"}
                 </span>
               </div>
             </div>
@@ -879,12 +859,18 @@ export default function AdminDashboard() {
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 space-y-1">
                       <h2 className="font-semibold truncate">
                         {applicant.name}
                       </h2>
                       <p className="text-sm text-muted-foreground truncate">
                         ID: {applicant.userId}
+                      </p>
+                      <p className="text-sm text-yellow-400 font-bold truncate">
+                        <span>
+                          <PhoneIcon className="w-4 h-4 inline-block mr-1" />
+                        </span>{" "}
+                        {applicant.phoneNo}
                       </p>
                     </div>
                     <div className="flex flex-col items-center gap-2">
@@ -979,9 +965,7 @@ export default function AdminDashboard() {
                 <DialogHeader className="p-4">
                   <DialogTitle className="text-xl font-semibold flex flex-col gap-2">
                     <div className="flex items-center gap-3 flex-wrap w-full">
-                      <span className="truncate">
-                        {selectedApplicant.name}
-                      </span>
+                      <span className="truncate">{selectedApplicant.name}</span>
                       <div className="flex items-center gap-[6px]">
                         <Badge
                           variant="outline"
@@ -993,12 +977,10 @@ export default function AdminDashboard() {
                         </Badge>
                         {isDuplicate(
                           selectedApplicant,
-                          getDuplicateInfo(
-                            Object.values(applicants).flat()
-                          ).emailGroups,
-                          getDuplicateInfo(
-                            Object.values(applicants).flat()
-                          ).transactionGroups
+                          getDuplicateInfo(Object.values(applicants).flat())
+                            .emailGroups,
+                          getDuplicateInfo(Object.values(applicants).flat())
+                            .transactionGroups
                         ) && (
                           <Badge
                             variant="outline"
