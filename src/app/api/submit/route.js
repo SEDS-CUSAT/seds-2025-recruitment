@@ -3,9 +3,20 @@ import connectDB from '@/lib/db';
 import Applicant from '@/lib/models/applicant';
 import { createUserId } from '@/lib/createUserId';
 import { sendDiscordWebhook, createDiscordEmbed } from '@/lib/sendWebhook';
+import { LAST_DATE } from '@/lib/constants';
 
 export async function POST(req) {
   try {
+    if (Date.now() > LAST_DATE) {
+      return NextResponse.json(
+        { 
+          title: "Recruitment Ended",
+          message: "The recruitment period has ended. Applications are no longer being accepted." 
+        },
+        { status: 403 }
+      );
+    }
+
     await connectDB();
     const formData = await req.formData();
 
