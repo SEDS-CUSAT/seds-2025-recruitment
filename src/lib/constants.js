@@ -66,6 +66,6 @@ const DEFAULT_UPI_LIST = [
 
 const MAX_FILE_SIZE = 512000;
 
-const LAST_DATE = new Date("2025-04-26T23:59:59Z").getTime();
+const LAST_DATE = new Date("2025-04-30T23:59:59Z").getTime();
 
 export { DEPARTMENTS, TEAMS, MAX_FILE_SIZE, DEFAULT_UPI_LIST, LAST_DATE };
